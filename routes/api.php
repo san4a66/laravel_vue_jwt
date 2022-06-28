@@ -28,13 +28,16 @@ Route::group(array(
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
+
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::group(['prefix'=>'fruits'], function (){
+            Route::get('/', \App\Http\Controllers\Fruit\IndexController::class );
+        });
+    });
 });
 
 Route::group(['prefix'=>'users'], function (){
     Route::post('/', \App\Http\Controllers\User\StoreController::class );
 });
 
-Route::group(['prefix'=>'fruits'], function (){
-    Route::get('/', \App\Http\Controllers\Fruit\IndexController::class );
-});
 
