@@ -1,5 +1,4 @@
 import axios from "axios";
-import router from "./router";
 
 
 const api = axios.create();
@@ -22,16 +21,10 @@ api.interceptors.request.use(config => {
 
 //end request
 
+//start response
 
 api.interceptors.response.use(
-    config => {
-        if (localStorage.getItem('access_token')) {
-
-            config.headers.authorization = `Bearer ${localStorage.getItem('access_token')}`
-
-            return config
-        }
-    },
+     {},
 
     error => {
         if (error.response.data.message === 'Token has expired') {

@@ -29,7 +29,7 @@ Route::group(array(
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
 
-    Route::group(['middleware' => 'auth:api'], function () {
+    Route::group(['middleware' => 'jwt.auth'], function () {
         Route::group(['prefix'=>'fruits'], function (){
             Route::get('/', \App\Http\Controllers\Fruit\IndexController::class );
         });

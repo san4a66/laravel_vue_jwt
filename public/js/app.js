@@ -5368,6 +5368,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../api */ "./resources/js/api.js");
 //
 //
 //
@@ -5378,6 +5379,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Index",
   data: function data() {
@@ -5394,9 +5397,61 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     getAccessToken: function getAccessToken() {
       this.accessToken = localStorage.getItem('access_token');
+    },
+    logout: function logout() {
+      var _this = this;
+
+      _api__WEBPACK_IMPORTED_MODULE_0__["default"].post('api/auth/logout').then(function (res) {
+        localStorage.removeItem('access_token');
+
+        _this.$router.push({
+          name: 'user.login'
+        });
+      });
     }
   }
 });
+
+/***/ }),
+
+/***/ "./resources/js/api.js":
+/*!*****************************!*\
+  !*** ./resources/js/api.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+
+var api = axios__WEBPACK_IMPORTED_MODULE_0___default().create(); //start request
+
+api.interceptors.request.use(function (config) {
+  if (localStorage.getItem('access_token')) {
+    config.headers.authorization = "Bearer ".concat(localStorage.getItem('access_token'));
+    return config;
+  }
+}, function (error) {}); //end request
+//start response
+
+api.interceptors.response.use({}, function (error) {
+  if (error.response.data.message === 'Token has expired') {
+    return axios__WEBPACK_IMPORTED_MODULE_0___default().post('api/auth/refresh', {}, {
+      headers: {
+        'authorization': "Bearer ".concat(localStorage.getItem('access_token'))
+      }
+    }).then(function (res) {
+      localStorage.setItem('access_token', res.data.access_token);
+      error.config.headers.authorization = "Bearer ".concat(res.data.access_token);
+      return api.request(error.config);
+    });
+  }
+});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (api);
 
 /***/ }),
 
@@ -5526,7 +5581,7 @@ route.beforeEach(function (to, from, next) {
     }
   }
 
-  if (to.name === 'user.login' && accessToken) {
+  if (to.name === 'user.login' || to.name === 'user.registration' && accessToken) {
     return next({
       name: 'user.personal'
     });
@@ -28097,6 +28152,22 @@ var render = function () {
         ? _c("router-link", { attrs: { to: { name: "user.personal" } } }, [
             _vm._v("Personal"),
           ])
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.accessToken
+        ? _c(
+            "a",
+            {
+              attrs: { href: "#" },
+              on: {
+                click: function ($event) {
+                  $event.preventDefault()
+                  return _vm.logout.apply(null, arguments)
+                },
+              },
+            },
+            [_vm._v("Logout")]
+          )
         : _vm._e(),
       _vm._v(" "),
       _c("router-view"),
